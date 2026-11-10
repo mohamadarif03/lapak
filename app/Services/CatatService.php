@@ -28,7 +28,10 @@ class CatatService
         $transcript = trim((string) $rawTranscript);
 
         if ($audioFile) {
-            $transcript = $this->transcribeAudio($audioFile);
+            $sttTranscript = $this->transcribeAudio($audioFile);
+            if (! empty($sttTranscript)) {
+                $transcript = $sttTranscript;
+            }
         }
 
         if (empty($transcript)) {
@@ -124,16 +127,11 @@ class CatatService
     {
         $openAiKey = config('services.openai.key') ?? env('OPENAI_API_KEY');
         $groqKey = config('services.groq.key') ?? env('GROQ_API_KEY');
-        $apiKey = $openAiKey ?: $groqKey;
+        $geminiKey = config('services.gemini.key') ?? env('GEMINI_API_KEY');
 
-        if (empty($apiKey)) {
+        if (empty($openAiKey) && empty($groqKey) && empty($geminiKey)) {
             return $deterministicParsed;
         }
-
-        $endpoint = $openAiKey
-            ? 'https://api.openai.com/v1/chat/completions'
-            : 'https://api.groq.com/openai/v1/chat/completions';
-        $model = $openAiKey ? 'gpt-4o-mini' : 'llama-3.3-70b-versatile';
 
         try {
             $systemPrompt = 'Kamu adalah asisten ekstraksi data pencatatan UMKM Indonesia.
@@ -148,20 +146,57 @@ Keluarkan JSON ketat dengan skema:
   "multiple_detected": boolean
 }';
 
-            $response = Http::timeout(10)
-                ->withToken($apiKey)
-                ->post($endpoint, [
-                    'model' => $model,
-                    'messages' => [
-                        ['role' => 'system', 'content' => $systemPrompt],
-                        ['role' => 'user', 'content' => "Transkrip ucapan: \"{$transcript}\""],
-                    ],
-                    'response_format' => ['type' => 'json_object'],
-                    'temperature' => 0.1,
-                ]);
+            $jsonContent = null;
 
-            if ($response->successful()) {
-                $aiData = json_decode((string) $response->json('choices.0.message.content'), true);
+            if (! empty($geminiKey)) {
+                $geminiModel = config('services.gemini.model') ?? env('GEMINI_MODEL', 'gemini-2.5-flash');
+                $response = Http::timeout(10)->post(
+                    "https://generativelanguage.googleapis.com/v1beta/models/{$geminiModel}:generateContent?key={$geminiKey}",
+                    [
+                        'contents' => [
+                            [
+                                'parts' => [
+                                    ['text' => $systemPrompt],
+                                    ['text' => "Transkrip ucapan: \"{$transcript}\""],
+                                ],
+                            ],
+                        ],
+                        'generationConfig' => [
+                            'response_mime_type' => 'application/json',
+                            'temperature' => 0.1,
+                        ],
+                    ]
+                );
+
+                if ($response->successful()) {
+                    $jsonContent = $response->json('candidates.0.content.parts.0.text');
+                }
+            } else {
+                $apiKey = $openAiKey ?: $groqKey;
+                $endpoint = $openAiKey
+                    ? 'https://api.openai.com/v1/chat/completions'
+                    : 'https://api.groq.com/openai/v1/chat/completions';
+                $model = $openAiKey ? 'gpt-4o-mini' : 'llama-3.3-70b-versatile';
+
+                $response = Http::timeout(10)
+                    ->withToken($apiKey)
+                    ->post($endpoint, [
+                        'model' => $model,
+                        'messages' => [
+                            ['role' => 'system', 'content' => $systemPrompt],
+                            ['role' => 'user', 'content' => "Transkrip ucapan: \"{$transcript}\""],
+                        ],
+                        'response_format' => ['type' => 'json_object'],
+                        'temperature' => 0.1,
+                    ]);
+
+                if ($response->successful()) {
+                    $jsonContent = $response->json('choices.0.message.content');
+                }
+            }
+
+            if ($jsonContent) {
+                $aiData = json_decode((string) $jsonContent, true);
                 if (is_array($aiData)) {
                     // Rule 4: Jika hasil parseSpokenAmount dan hasil model AI berbeda, pakai hasil parseSpokenAmount dan tandai needs_review = true
                     if (isset($aiData['amount']) && $aiData['amount'] !== $deterministicParsed['amount']) {

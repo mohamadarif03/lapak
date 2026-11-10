@@ -22,19 +22,42 @@ import PhoneOtpAuthCard from '@/components/auth/phone-otp-auth-card';
 
 type Props = {
     status?: string;
-    canResetPassword: boolean;
+    sessionExpiredMessage?: string;
+    canResetPassword?: boolean;
+    next?: string;
+    initialStep?: 'phone' | 'otp';
+    initialPhone?: string;
+    initialMaskedPhone?: string;
+    initialChannel?: 'whatsapp' | 'sms';
+    initialResendWait?: number;
 };
 
-export default function Login({ status, canResetPassword }: Props) {
+export default function Login({
+    status,
+    sessionExpiredMessage,
+    canResetPassword = false,
+    next = '/dashboard',
+    initialStep = 'phone',
+    initialPhone = '',
+    initialMaskedPhone = '',
+    initialChannel = 'whatsapp',
+    initialResendWait = 0,
+}: Props) {
     const [authMethod, setAuthMethod] = useState<'phone' | 'email'>('phone');
+
+    const displayStatus = sessionExpiredMessage || status;
 
     return (
         <div className="space-y-6">
             <Head title="Masuk Akun LAPAK" />
 
-            {status && (
-                <div className="rounded-xl border border-[#A8BFA8] bg-[#E4F3E8] p-3 text-center text-sm font-medium text-[#216E45]">
-                    {status}
+            {displayStatus && (
+                <div
+                    role="alert"
+                    aria-live="assertive"
+                    className="rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-center text-sm font-semibold text-amber-900 shadow-xs"
+                >
+                    {displayStatus}
                 </div>
             )}
 
@@ -76,16 +99,25 @@ export default function Login({ status, canResetPassword }: Props) {
             {/* TAB 1: Desain ACC-01 (Nomor HP & OTP) */}
             {authMethod === 'phone' ? (
                 <div className="space-y-4">
-                    <PhoneOtpAuthCard mode="login" />
+                    <PhoneOtpAuthCard
+                        mode="login"
+                        next={next}
+                        initialStep={initialStep}
+                        initialPhone={initialPhone}
+                        initialMaskedPhone={initialMaskedPhone}
+                        initialChannel={initialChannel}
+                        initialResendWait={initialResendWait}
+                    />
                     
                     <div className="pt-2 text-center text-sm text-muted-foreground">
                         Belum punya akun usaha?{' '}
-                        <TextLink
-                            href={register()}
-                            className="font-bold text-primary hover:text-primary/80"
+                        <button
+                            type="button"
+                            onClick={() => setAuthMethod('phone')}
+                            className="font-bold text-primary hover:text-primary/80 underline underline-offset-2"
                         >
-                            Daftar Akun Baru
-                        </TextLink>
+                            Masuk & Daftar Otomatis
+                        </button>
                     </div>
                 </div>
             ) : (

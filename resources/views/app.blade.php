@@ -1,8 +1,20 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@php
+    $lapakTextSize = request()->cookie('lapak_text_size', auth()->user()?->preference?->text_size ?? 'normal');
+    $lapakTextSize = in_array($lapakTextSize, ['normal', 'besar'], true) ? $lapakTextSize : 'normal';
+@endphp
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-text-size="{{ $lapakTextSize }}" class="{{ $lapakTextSize === 'besar' ? 'text-size-besar' : '' }}">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        @php
+            $isPublicLanding = request()->is('/') || request()->is('syarat') || request()->is('privasi');
+        @endphp
+        @if ($isPublicLanding)
+            <meta name="robots" content="index, follow">
+        @else
+            <meta name="robots" content="noindex, nofollow">
+        @endif
 
         {{-- Enforce LAPAK Light Theme per design.md regardless of OS theme --}}
         <script>
@@ -11,6 +23,18 @@
                     localStorage.setItem('appearance', 'light');
                 } catch (e) {}
                 document.documentElement.classList.remove('dark');
+
+                try {
+                    var m = document.cookie.match(/(?:^|; )lapak_text_size=([^;]*)/);
+                    var s = m ? decodeURIComponent(m[1]) : localStorage.getItem('lapak_text_size');
+                    if (s === 'besar') {
+                        document.documentElement.setAttribute('data-text-size', 'besar');
+                        document.documentElement.classList.add('text-size-besar');
+                    } else if (s === 'normal') {
+                        document.documentElement.setAttribute('data-text-size', 'normal');
+                        document.documentElement.classList.remove('text-size-besar');
+                    }
+                } catch(e) {}
             })();
         </script>
 

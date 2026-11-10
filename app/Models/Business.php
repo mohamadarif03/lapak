@@ -23,6 +23,8 @@ class Business extends Model
         'lat',
         'lng',
         'analysis_viewed_at',
+        'main_products',
+        'price_range',
     ];
 
     /**
@@ -67,5 +69,13 @@ class Business extends Model
     public function campaigns(): HasMany
     {
         return $this->hasMany(Campaign::class);
+    }
+
+    /**
+     * @return HasMany<SocialConnection, $this>
+     */
+    public function socialConnections(): HasMany
+    {
+        return $this->hasMany(SocialConnection::class);
     }
 }

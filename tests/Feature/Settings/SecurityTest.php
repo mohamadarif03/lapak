@@ -18,16 +18,18 @@ test('security page is displayed', function () {
 
     $user = User::factory()->create();
 
-    $this->actingAs($user)
+    $res = $this->actingAs($user)
         ->withSession(['auth.password_confirmed_at' => time()])
-        ->get(route('security.edit'))
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('settings/security')
-            ->where('canManagePasskeys', true)
-            ->where('passkeys', [])
-            ->where('canManageTwoFactor', true)
-            ->where('twoFactorEnabled', false),
-        );
+        ->get(route('security.edit'));
+
+    $res->assertStatus(200);
+    $res->assertInertia(fn (Assert $page) => $page
+        ->component('settings/security')
+        ->where('canManagePasskeys', true)
+        ->where('passkeys', [])
+        ->where('canManageTwoFactor', true)
+        ->where('twoFactorEnabled', false),
+    );
 });
 
 test('security page requires password confirmation when enabled', function () {

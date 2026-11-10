@@ -53,7 +53,7 @@ test('phone otp verify creates user, logs in, and redirects to onboarding in reg
 
     $this->assertAuthenticated();
     $this->assertDatabaseHas('users', [
-        'phone' => '081299887766',
+        'phone' => '+6281299887766',
     ]);
 });
 

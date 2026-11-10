@@ -18,7 +18,7 @@ afterEach(function () {
 test('pengguna tanpa sesi dialihkan ke halaman masuk', function () {
     $response = $this->get('/dashboard');
 
-    $response->assertRedirect('/masuk');
+    $response->assertRedirect('/masuk?next=%2Fdashboard');
     $response->assertSessionHas('message', 'Sesi berakhir, silakan masuk lagi.');
 });
 

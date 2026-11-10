@@ -17,7 +17,7 @@ afterEach(function () {
 test('tamu tanpa sesi dialihkan ke halaman masuk', function () {
     $response = $this->get('/catat');
 
-    $response->assertRedirect('/masuk');
+    $response->assertRedirect('/masuk?next=%2Fcatat');
 });
 
 test('pengguna belum punya profil usaha dialihkan ke profil usaha', function () {

@@ -20,6 +20,11 @@ class Insight extends Model
         'recommendation',
         'source',
         'data_date',
+        'facts',
+        'facts_hash',
+        'radius_m',
+        'generated_by',
+        'expires_at',
     ];
 
     /**
@@ -29,6 +34,8 @@ class Insight extends Model
     {
         return [
             'data_date' => 'date',
+            'facts' => 'array',
+            'expires_at' => 'datetime',
         ];
     }
 

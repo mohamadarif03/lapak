@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Transaction;
 use App\Services\CatatService;
+use App\Support\AuthHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -22,18 +24,13 @@ class CatatController extends Controller
      */
     public function index(Request $request): Response|RedirectResponse
     {
-        if (! Auth::check()) {
-            return redirect('/masuk')
-                ->with('status', 'Sesi berakhir, silakan masuk lagi.')
-                ->with('message', 'Sesi berakhir, silakan masuk lagi.');
+        $auth = AuthHelper::requireBusiness($request);
+        if ($auth instanceof RedirectResponse) {
+            return $auth;
         }
 
-        $user = $request->user();
-        $business = $user->business;
-
-        if (! $business) {
-            return redirect('/profil-usaha');
-        }
+        $user = $auth['user'];
+        $business = $auth['business'];
 
         $tanggal = $request->query('tanggal');
         $dailyData = $this->catatService->getDailyTransactions($business->id, $tanggal);
@@ -64,7 +61,9 @@ class CatatController extends Controller
             }
         }
 
-        return Inertia::render('catat/index', [
+        $view = class_exists('\Laravel\Fortify\Fortify') ? 'catat/index' : 'Catat/Index';
+
+        return Inertia::render($view, [
             'business' => [
                 'id' => $business->id,
                 'owner_name' => $business->owner_name,
@@ -98,6 +97,19 @@ class CatatController extends Controller
     {
         if (! Auth::check()) {
             return response()->json(['message' => 'Unauthenticated.'], 401);
+        }
+
+        $user = $request->user();
+        if ($user && $user->is_demo) {
+            $demoKey = 'demo_ai_stt:'.$user->id;
+            if (RateLimiter::tooManyAttempts($demoKey, 20)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Batas demo tercapai. Daftar untuk memakai penuh.',
+                    'redirect' => route('masuk'),
+                ], 429);
+            }
+            RateLimiter::hit($demoKey, 3600);
         }
 
         $business = $request->user()->business;

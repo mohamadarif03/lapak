@@ -143,3 +143,14 @@
         color: #183C30;
     }
 }
+
+/* LAPAK Global Text Size Scaling */
+html[data-text-size="besar"],
+html.text-size-besar {
+    font-size: 125%;
+}
+
+html[data-text-size="normal"],
+html.text-size-normal {
+    font-size: 100%;
+}

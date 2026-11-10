@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\DashboardService;
+use App\Support\AuthHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -21,18 +22,13 @@ class DashboardController extends Controller
      */
     public function index(Request $request): Response|RedirectResponse
     {
-        if (! Auth::check()) {
-            return redirect('/masuk')
-                ->with('status', 'Sesi berakhir, silakan masuk lagi.')
-                ->with('message', 'Sesi berakhir, silakan masuk lagi.');
+        $auth = AuthHelper::requireBusiness($request);
+        if ($auth instanceof RedirectResponse) {
+            return $auth;
         }
 
-        $user = $request->user();
-        $business = $user->business;
-
-        if (! $business) {
-            return redirect('/profil-usaha');
-        }
+        $user = $auth['user'];
+        $business = $auth['business'];
 
         $periode = (string) $request->query('periode', 'hari');
         $dashboardData = $this->dashboardService->getDashboardData($business->id, $periode);
