@@ -49,23 +49,20 @@ class DashboardHelper
         if ($normalized === 'hari') {
             $start = $now->copy()->startOfDay();
             $end = $now->copy()->endOfDay();
-
             $prevStart = $now->copy()->subDay()->startOfDay();
             $prevEnd = $now->copy()->subDay()->endOfDay();
             $prevLabel = 'kemarin';
         } elseif ($normalized === 'minggu') {
             $start = $now->copy()->startOfWeek(Carbon::MONDAY)->startOfDay();
             $end = $now->copy()->endOfWeek(Carbon::SUNDAY)->endOfDay();
-
             $prevStart = $now->copy()->subWeek()->startOfWeek(Carbon::MONDAY)->startOfDay();
             $prevEnd = $now->copy()->subWeek()->endOfWeek(Carbon::SUNDAY)->endOfDay();
             $prevLabel = 'minggu lalu';
         } else {
             $start = $now->copy()->startOfMonth()->startOfDay();
             $end = $now->copy()->endOfMonth()->endOfDay();
-
-            $prevStart = $now->copy()->subMonth()->startOfMonth()->startOfDay();
-            $prevEnd = $now->copy()->subMonth()->endOfMonth()->endOfDay();
+            $prevStart = $now->copy()->subMonthNoOverflow()->startOfMonth()->startOfDay();
+            $prevEnd = $now->copy()->subMonthNoOverflow()->endOfMonth()->endOfDay();
             $prevLabel = 'bulan lalu';
         }
 
@@ -80,24 +77,26 @@ class DashboardHelper
     }
 
     /**
-     * Calculate percentage change from previous.
-     * Returns null if previous = 0.
+     * Get day range for date in Asia/Jakarta (WIB).
+     *
+     * @return array{start: Carbon, end: Carbon}
      */
-    public static function calcDelta(int|float $current, int|float $previous): ?int
+    public static function getDayRange(string|Carbon $date): array
     {
-        if ($previous == 0) {
-            return null;
-        }
+        $c = $date instanceof Carbon
+            ? $date->copy()->timezone('Asia/Jakarta')
+            : Carbon::parse($date, 'Asia/Jakarta');
 
-        $delta = (($current - $previous) / abs($previous)) * 100;
-
-        return (int) round($delta);
+        return [
+            'start' => $c->copy()->startOfDay(),
+            'end' => $c->copy()->endOfDay(),
+        ];
     }
 
     /**
-     * Format transaction occurred_at date.
-     * Today: "14.30"
-     * Other day: "12 Okt"
+     * Format transaction time display according to spec:
+     * - Same day: "14.30"
+     * - Different day: "15 Okt, 14.30"
      */
     public static function formatTransactionTime(Carbon|string $date, ?Carbon $now = null): string
     {
@@ -116,22 +115,8 @@ class DashboardHelper
 
         $day = $dt->day;
         $month = $months[$dt->month] ?? $dt->format('M');
+        $time = $dt->format('H.i');
 
-        return "{$day} {$month}";
-    }
-
-    /**
-     * Get speech example based on business_type.
-     */
-    public static function getExampleUtterance(?string $businessType): string
-    {
-        return match (strtolower(trim((string) $businessType))) {
-            'kuliner' => 'Jual dua nasi goreng, tiga puluh ribu.',
-            'fashion' => 'Jual satu kemeja batik, seratus lima puluh ribu.',
-            'kerajinan' => 'Jual tiga gantungan kunci, enam puluh ribu.',
-            'jasa' => 'Terima pembayaran servis, seratus ribu.',
-            'dagang' => 'Jual lima bungkus kopi, lima puluh ribu.',
-            default => 'Jual dua barang, lima puluh ribu.',
-        };
+        return "{$day} {$month}, {$time}";
     }
 }

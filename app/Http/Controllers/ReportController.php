@@ -53,7 +53,7 @@ class ReportController extends Controller
             ]);
         }
 
-        return Inertia::render('catat/laporan', [
+        return Inertia::render('Catat/Laporan', [
             'report' => $report,
             'warning' => $warning,
             'range' => [

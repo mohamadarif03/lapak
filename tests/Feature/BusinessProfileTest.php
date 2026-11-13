@@ -24,7 +24,7 @@ class BusinessProfileTest extends TestCase
         $response = $this->actingAs($user)->get('/profil-usaha');
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
-            ->component('onboarding')
+            ->component('BusinessProfile/Index')
             ->where('mode', 'create')
             ->where('business', null)
         );
@@ -62,7 +62,7 @@ class BusinessProfileTest extends TestCase
         $response = $this->actingAs($user)->get('/profil-usaha?ubah=1');
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
-            ->component('onboarding')
+            ->component('BusinessProfile/Index')
             ->where('mode', 'edit')
             ->where('business.owner_name', 'Bu Rara')
             ->where('business.business_name', 'Warung Berkah Bu Rara')

@@ -73,7 +73,7 @@ class PromotionTest extends TestCase
         $response = $this->actingAs($user)->get("/promosi?insight={$insight->id}");
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
-            ->component('promosi/index')
+            ->component('Promotions/Index')
             ->has('activeInsight')
             ->where('activeInsight.id', $insight->id)
             ->where('activeInsight.title', 'Menu Es Kopi Susu paling ramai jam 15.00-16.00')
@@ -87,7 +87,7 @@ class PromotionTest extends TestCase
         $response = $this->actingAs($user)->get('/promosi?insight=99999');
         $response->assertStatus(200);
         $response->assertInertia(fn ($page) => $page
-            ->component('promosi/index')
+            ->component('Promotions/Index')
             ->where('warning', 'Insight tidak ditemukan.')
             ->where('activeInsight', null)
         );

@@ -101,6 +101,134 @@ class PhoneAuthController extends Controller
     }
 
     /**
+     * Handle simple login with Phone (WhatsApp) + Password (No OTP).
+     */
+    public function login(Request $request): JsonResponse
+    {
+        $phoneInput = (string) $request->input('phone');
+        $norm = AuthHelper::normalizePhone($phoneInput);
+        if (! $norm['ok'] || ! isset($norm['e164'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor WhatsApp tidak valid. Contoh: 0812 3456 7890.',
+            ], 422);
+        }
+
+        $password = (string) $request->input('password');
+        if (empty($password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kata sandi / password wajib diisi.',
+            ], 422);
+        }
+
+        $e164 = $norm['e164'];
+        $user = User::query()->where('phone', $e164)->first();
+
+        if (! $user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor WhatsApp belum terdaftar. Silakan daftar akun baru.',
+            ], 404);
+        }
+
+        if (! Hash::check($password, $user->password)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kata sandi salah. Silakan periksa kembali.',
+            ], 401);
+        }
+
+        $user->update([
+            'last_login_at' => Carbon::now(),
+        ]);
+
+        Auth::login($user, remember: true);
+        $request->session()->regenerate();
+        $request->session()->put('had_session', true);
+
+        if (! $user->business) {
+            $redirect = route('profil-usaha');
+        } else {
+            $redirect = AuthHelper::safeRedirect($request->input('next'));
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil masuk!',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => AuthHelper::maskPhone($user->phone ?? $e164),
+            ],
+            'redirect' => $redirect,
+        ]);
+    }
+
+    /**
+     * Handle simple register with Name, Phone (WhatsApp) + Password (No OTP).
+     */
+    public function register(Request $request): JsonResponse
+    {
+        $phoneInput = (string) $request->input('phone');
+        $norm = AuthHelper::normalizePhone($phoneInput);
+        if (! $norm['ok'] || ! isset($norm['e164'])) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor WhatsApp tidak valid. Contoh: 0812 3456 7890.',
+            ], 422);
+        }
+
+        $e164 = $norm['e164'];
+
+        $existingUser = User::query()->where('phone', $e164)->first();
+        if ($existingUser) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Nomor WhatsApp sudah terdaftar. Silakan langsung masuk.',
+            ], 409);
+        }
+
+        $password = (string) $request->input('password');
+        if (strlen($password) < 6) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Kata sandi minimal 6 karakter.',
+            ], 422);
+        }
+
+        $name = trim((string) $request->input('name'));
+        if (empty($name)) {
+            $name = 'Pemilik Toko ' . substr($e164, -4);
+        }
+
+        $user = User::create([
+            'name' => $name,
+            'email' => $e164 . '@lapak.id',
+            'phone' => $e164,
+            'password' => Hash::make($password),
+            'consent_at' => Carbon::now(),
+            'consent_version' => '2026-11',
+            'last_login_at' => Carbon::now(),
+        ]);
+
+        Auth::login($user, remember: true);
+        $request->session()->regenerate();
+        $request->session()->put('had_session', true);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pendaftaran berhasil!',
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'phone' => AuthHelper::maskPhone($user->phone ?? $e164),
+            ],
+            'redirect' => route('profil-usaha'),
+        ]);
+    }
+
+    /**
      * Send OTP code to the given phone number via WhatsApp or SMS.
      */
     public function sendOtp(Request $request, OtpSenderService $otpSender): JsonResponse

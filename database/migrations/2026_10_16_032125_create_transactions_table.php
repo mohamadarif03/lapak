@@ -22,9 +22,11 @@ return new class extends Migration
             $table->text('note')->nullable();
             $table->string('source')->default('voice'); // voice, manual
             $table->timestamp('occurred_at');
+            $table->string('idempotency_key')->nullable();
             $table->timestamps();
 
             $table->index(['business_id', 'occurred_at']);
+            $table->index(['business_id', 'idempotency_key']);
         });
     }
 

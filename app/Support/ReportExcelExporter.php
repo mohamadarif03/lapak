@@ -371,6 +371,7 @@ class ReportExcelExporter
     protected static function buildTransactionsSheet(array $report): string
     {
         $transactions = $report['transactions'] ?? [];
+        $totalRows = count($transactions);
 
         $sheetData = '<row r="1">'
             .'<c r="A1" s="2" t="inlineStr"><is><t>Tanggal</t></is></c>'

@@ -1,151 +1,175 @@
 <?php
 
+namespace Tests\Unit;
+
 use App\Support\SpokenTransactionParser;
 use Carbon\Carbon;
+use PHPUnit\Framework\TestCase;
 
-beforeEach(function () {
-    Carbon::setTestNow(Carbon::parse('2026-10-16 14:30:00', 'Asia/Jakarta'));
-});
+class SpokenTransactionParserTest extends TestCase
+{
+    protected function setUp(): void
+    {
+        parent::setUp();
+        Carbon::setTestNow(Carbon::parse('2026-10-16 14:30:00', 'Asia/Jakarta'));
+    }
 
-afterEach(function () {
-    Carbon::setTestNow();
-});
+    protected function tearDown(): void
+    {
+        Carbon::setTestNow();
+        parent::tearDown();
+    }
 
-test('1. Jual dua nasi goreng tiga puluh ribu', function () {
-    $result = SpokenTransactionParser::parse('Jual dua nasi goreng tiga puluh ribu');
+    public function test_1_jual_dua_nasi_goreng_tiga_puluh_ribu(): void
+    {
+        $result = SpokenTransactionParser::parse('Jual dua nasi goreng tiga puluh ribu');
 
-    expect($result['type'])->toBe('income')
-        ->and($result['amount'])->toBe(30000)
-        ->and($result['item'])->toBe('Nasi goreng')
-        ->and($result['quantity'])->toBe(2)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('income', $result['type']);
+        $this->assertEquals(30000, $result['amount']);
+        $this->assertEquals('Nasi goreng', $result['item']);
+        $this->assertEquals(2, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('2. Beli gula dua puluh ribu', function () {
-    $result = SpokenTransactionParser::parse('Beli gula dua puluh ribu');
+    public function test_2_beli_gula_dua_puluh_ribu(): void
+    {
+        $result = SpokenTransactionParser::parse('Beli gula dua puluh ribu');
 
-    expect($result['type'])->toBe('expense')
-        ->and($result['amount'])->toBe(20000)
-        ->and($result['item'])->toBe('Gula')
-        ->and($result['quantity'])->toBe(1)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('expense', $result['type']);
+        $this->assertEquals(20000, $result['amount']);
+        $this->assertEquals('Gula', $result['item']);
+        $this->assertEquals(1, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('3. Terjual es kopi goceng', function () {
-    $result = SpokenTransactionParser::parse('Terjual es kopi goceng');
+    public function test_3_terjual_es_kopi_goceng(): void
+    {
+        $result = SpokenTransactionParser::parse('Terjual es kopi goceng');
 
-    expect($result['type'])->toBe('income')
-        ->and($result['amount'])->toBe(5000)
-        ->and($result['item'])->toBe('Es kopi')
-        ->and($result['quantity'])->toBe(1)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('income', $result['type']);
+        $this->assertEquals(5000, $result['amount']);
+        $this->assertEquals('Es kopi', $result['item']);
+        $this->assertEquals(1, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('4. Laku kemeja batik seratus lima puluh ribu', function () {
-    $result = SpokenTransactionParser::parse('Laku kemeja batik seratus lima puluh ribu');
+    public function test_4_laku_kemeja_batik_seratus_lima_puluh_ribu(): void
+    {
+        $result = SpokenTransactionParser::parse('Laku kemeja batik seratus lima puluh ribu');
 
-    expect($result['type'])->toBe('income')
-        ->and($result['amount'])->toBe(150000)
-        ->and($result['item'])->toBe('Kemeja batik')
-        ->and($result['quantity'])->toBe(1)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('income', $result['type']);
+        $this->assertEquals(150000, $result['amount']);
+        $this->assertEquals('Kemeja batik', $result['item']);
+        $this->assertEquals(1, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('5. Bayar listrik limabelas rebu', function () {
-    $result = SpokenTransactionParser::parse('Bayar listrik limabelas rebu');
+    public function test_5_bayar_listrik_limabelas_rebu(): void
+    {
+        $result = SpokenTransactionParser::parse('Bayar listrik limabelas rebu');
 
-    expect($result['type'])->toBe('expense')
-        ->and($result['amount'])->toBe(15000)
-        ->and($result['item'])->toBe('Listrik')
-        ->and($result['quantity'])->toBe(1)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('expense', $result['type']);
+        $this->assertEquals(15000, $result['amount']);
+        $this->assertEquals('Listrik', $result['item']);
+        $this->assertEquals(1, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('6. Beli bensin ceban', function () {
-    $result = SpokenTransactionParser::parse('Beli bensin ceban');
+    public function test_6_beli_bensin_ceban(): void
+    {
+        $result = SpokenTransactionParser::parse('Beli bensin ceban');
 
-    expect($result['type'])->toBe('expense')
-        ->and($result['amount'])->toBe(10000)
-        ->and($result['item'])->toBe('Bensin')
-        ->and($result['quantity'])->toBe(1)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('expense', $result['type']);
+        $this->assertEquals(10000, $result['amount']);
+        $this->assertEquals('Bensin', $result['item']);
+        $this->assertEquals(1, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('7. Jual tiga kue masing-masing lima ribu', function () {
-    $result = SpokenTransactionParser::parse('Jual tiga kue masing-masing lima ribu');
+    public function test_7_jual_tiga_kue_masing_masing_lima_ribu(): void
+    {
+        $result = SpokenTransactionParser::parse('Jual tiga kue masing-masing lima ribu');
 
-    expect($result['type'])->toBe('income')
-        ->and($result['amount'])->toBe(15000)
-        ->and($result['item'])->toBe('Kue')
-        ->and($result['quantity'])->toBe(3)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('income', $result['type']);
+        $this->assertEquals(15000, $result['amount']);
+        $this->assertEquals('Kue', $result['item']);
+        $this->assertEquals(3, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('8. Terima pembayaran servis sejuta', function () {
-    $result = SpokenTransactionParser::parse('Terima pembayaran servis sejuta');
+    public function test_8_terima_pembayaran_servis_sejuta(): void
+    {
+        $result = SpokenTransactionParser::parse('Terima pembayaran servis sejuta');
 
-    expect($result['type'])->toBe('income')
-        ->and($result['amount'])->toBe(1000000)
-        ->and($result['item'])->toBe('Servis')
-        ->and($result['quantity'])->toBe(1)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('income', $result['type']);
+        $this->assertEquals(1000000, $result['amount']);
+        $this->assertEquals('Servis', $result['item']);
+        $this->assertEquals(1, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('9. Beli plastik setengah juta', function () {
-    $result = SpokenTransactionParser::parse('Beli plastik setengah juta');
+    public function test_9_beli_plastik_setengah_juta(): void
+    {
+        $result = SpokenTransactionParser::parse('Beli plastik setengah juta');
 
-    expect($result['type'])->toBe('expense')
-        ->and($result['amount'])->toBe(500000)
-        ->and($result['item'])->toBe('Plastik')
-        ->and($result['quantity'])->toBe(1)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('expense', $result['type']);
+        $this->assertEquals(500000, $result['amount']);
+        $this->assertEquals('Plastik', $result['item']);
+        $this->assertEquals(1, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('10. Kemarin jual lima kopi dua puluh lima ribu', function () {
-    $result = SpokenTransactionParser::parse('Kemarin jual lima kopi dua puluh lima ribu');
+    public function test_10_kemarin_jual_lima_kopi_dua_puluh_lima_ribu(): void
+    {
+        $result = SpokenTransactionParser::parse('Kemarin jual lima kopi dua puluh lima ribu');
 
-    expect($result['type'])->toBe('income')
-        ->and($result['amount'])->toBe(25000)
-        ->and($result['item'])->toBe('Kopi')
-        ->and($result['quantity'])->toBe(5);
+        $this->assertEquals('income', $result['type']);
+        $this->assertEquals(25000, $result['amount']);
+        $this->assertEquals('Kopi', $result['item']);
+        $this->assertEquals(5, $result['quantity']);
 
-    $occurredDate = Carbon::parse($result['occurred_at'])->setTimezone('Asia/Jakarta');
-    expect($occurredDate->toDateString())->toBe('2026-10-15');
-});
+        $occurredDate = Carbon::parse($result['occurred_at'])->setTimezone('Asia/Jakarta');
+        $this->assertEquals('2026-10-15', $occurredDate->toDateString());
+    }
 
-test('11. Jual nasi goreng (tanpa nominal)', function () {
-    $result = SpokenTransactionParser::parse('Jual nasi goreng');
+    public function test_11_jual_nasi_goreng_tanpa_nominal(): void
+    {
+        $result = SpokenTransactionParser::parse('Jual nasi goreng');
 
-    expect($result['type'])->toBe('income')
-        ->and($result['amount'])->toBeNull()
-        ->and($result['item'])->toBe('Nasi goreng')
-        ->and($result['quantity'])->toBe(1)
-        ->and($result['needs_review'])->toBeTrue();
-});
+        $this->assertEquals('income', $result['type']);
+        $this->assertNull($result['amount']);
+        $this->assertEquals('Nasi goreng', $result['item']);
+        $this->assertEquals(1, $result['quantity']);
+        $this->assertTrue($result['needs_review']);
+    }
 
-test('12. Ongkos kirim dua puluh ribu', function () {
-    $result = SpokenTransactionParser::parse('Ongkos kirim dua puluh ribu');
+    public function test_12_ongkos_kirim_dua_puluh_ribu(): void
+    {
+        $result = SpokenTransactionParser::parse('Ongkos kirim dua puluh ribu');
 
-    expect($result['type'])->toBe('expense')
-        ->and($result['amount'])->toBe(20000)
-        ->and($result['item'])->toBe('Ongkos kirim')
-        ->and($result['quantity'])->toBe(1)
-        ->and($result['needs_review'])->toBeFalse();
-});
+        $this->assertEquals('expense', $result['type']);
+        $this->assertEquals(20000, $result['amount']);
+        $this->assertEquals('Ongkos kirim', $result['item']);
+        $this->assertEquals(1, $result['quantity']);
+        $this->assertFalse($result['needs_review']);
+    }
 
-test('deteksi transaksi majemuk (multiple_detected) mengembalikan transaksi pertama', function () {
-    $result = SpokenTransactionParser::parse('Jual dua nasi goreng tiga puluh ribu lalu beli es batu goceng');
+    public function test_deteksi_transaksi_majemuk_mengembalikan_transaksi_pertama(): void
+    {
+        $result = SpokenTransactionParser::parse('Jual dua nasi goreng tiga puluh ribu lalu beli es batu goceng');
 
-    expect($result['multiple_detected'])->toBeTrue()
-        ->and($result['type'])->toBe('income')
-        ->and($result['item'])->toBe('Nasi goreng')
-        ->and($result['amount'])->toBe(30000);
-});
+        $this->assertTrue($result['multiple_detected']);
+        $this->assertEquals('income', $result['type']);
+        $this->assertEquals('Nasi goreng', $result['item']);
+        $this->assertEquals(30000, $result['amount']);
+    }
 
-test('variasi penulisan nominal k, rb, koma, titik, dan dialek gocap cepek', function () {
-    expect(SpokenTransactionParser::parseSpokenAmount('jual baju 50k'))->toBe(50000)
-        ->and(SpokenTransactionParser::parseSpokenAmount('beli bensin 15rb'))->toBe(15000)
-        ->and(SpokenTransactionParser::parseSpokenAmount('servis 15.000'))->toBe(15000)
-        ->and(SpokenTransactionParser::parseSpokenAmount('jual celana gocap'))->toBe(50000)
-        ->and(SpokenTransactionParser::parseSpokenAmount('laku jaket cepek'))->toBe(100000);
-});
+    public function test_variasi_penulisan_nominal(): void
+    {
+        $this->assertEquals(50000, SpokenTransactionParser::parseSpokenAmount('jual baju 50k'));
+        $this->assertEquals(15000, SpokenTransactionParser::parseSpokenAmount('beli bensin 15rb'));
+        $this->assertEquals(15000, SpokenTransactionParser::parseSpokenAmount('servis 15.000'));
+        $this->assertEquals(50000, SpokenTransactionParser::parseSpokenAmount('jual celana gocap'));
+        $this->assertEquals(100000, SpokenTransactionParser::parseSpokenAmount('laku jaket cepek'));
+    }
+}

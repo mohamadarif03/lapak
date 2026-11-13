@@ -42,7 +42,7 @@ class AnalysisController extends Controller
             $business->update(['analysis_viewed_at' => now()]);
         }
 
-        return Inertia::render('analisis/index', [
+        return Inertia::render('Analisis/Index', [
             'business' => [
                 'id' => $business->id,
                 'business_name' => $business->business_name,

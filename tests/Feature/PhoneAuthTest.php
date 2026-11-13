@@ -36,6 +36,7 @@ class PhoneAuthTest extends TestCase
     {
         $response = $this->get('/masuk?pesan=sesi-berakhir');
         $response->assertStatus(200);
+        $response->assertSee('Sesi berakhir, silakan masuk lagi.');
     }
 
     public function test_masuk_redirects_authenticated_user_with_business_to_dashboard(): void

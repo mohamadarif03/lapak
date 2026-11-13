@@ -56,6 +56,14 @@ class Business extends Model
     }
 
     /**
+     * @return HasMany<VoiceLog, $this>
+     */
+    public function voiceLogs(): HasMany
+    {
+        return $this->hasMany(VoiceLog::class);
+    }
+
+    /**
      * @return HasMany<Insight, $this>
      */
     public function insights(): HasMany
