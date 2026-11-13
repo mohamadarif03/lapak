@@ -14,7 +14,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
 import PasskeyVerify from '@/components/passkey-verify';
@@ -111,13 +110,12 @@ export default function Login({
                     
                     <div className="pt-2 text-center text-sm text-muted-foreground">
                         Belum punya akun usaha?{' '}
-                        <button
-                            type="button"
-                            onClick={() => setAuthMethod('phone')}
+                        <TextLink
+                            href="/register"
                             className="font-bold text-primary hover:text-primary/80 underline underline-offset-2"
                         >
                             Masuk & Daftar Otomatis
-                        </button>
+                        </TextLink>
                     </div>
                 </div>
             ) : (
@@ -212,7 +210,7 @@ export default function Login({
                                 <div className="text-center text-sm text-muted-foreground">
                                     Belum punya akun usaha?{' '}
                                     <TextLink
-                                        href={register()}
+                                        href="/register"
                                         tabIndex={6}
                                         className="font-bold text-primary hover:text-primary/80"
                                     >

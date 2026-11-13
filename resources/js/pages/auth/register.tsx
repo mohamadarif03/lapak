@@ -1,6 +1,5 @@
 import { Head } from '@inertiajs/react';
 import TextLink from '@/components/text-link';
-import { login } from '@/routes';
 import PhoneOtpAuthCard from '@/components/auth/phone-otp-auth-card';
 
 type Props = {
@@ -19,7 +18,7 @@ export default function Register({ passwordRules }: Props) {
                 <div className="pt-2 text-center text-sm text-muted-foreground">
                     Sudah punya akun usaha?{' '}
                     <TextLink
-                        href={login()}
+                        href="/login"
                         className="font-bold text-primary hover:text-primary/80"
                     >
                         Masuk di Sini
