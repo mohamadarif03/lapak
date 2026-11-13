@@ -1,5 +1,5 @@
 import GuestLayout from '@/Layouts/GuestLayout';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
     CheckCircle2,
     Eye,
@@ -19,6 +19,7 @@ type Props = {
     sessionExpiredMessage?: string;
     next?: string;
     initialPhone?: string;
+    initialMode?: 'login' | 'register';
 };
 
 export default function Login({
@@ -26,8 +27,18 @@ export default function Login({
     sessionExpiredMessage,
     next = '/dashboard',
     initialPhone = '',
+    initialMode,
 }: Props) {
-    const [mode, setMode] = useState<'login' | 'register'>('login');
+    const [mode, setMode] = useState<'login' | 'register'>(() => {
+        if (initialMode) return initialMode;
+        if (typeof window !== 'undefined') {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mode') === 'register' || window.location.pathname.endsWith('/register')) {
+                return 'register';
+            }
+        }
+        return 'login';
+    });
     const [name, setName] = useState('');
     const [phone, setPhone] = useState(initialPhone);
     const [password, setPassword] = useState('');
@@ -165,6 +176,9 @@ export default function Login({
                             setMode('login');
                             setErrorMessage('');
                             setSuccessMessage('');
+                            if (typeof window !== 'undefined' && window.location.pathname !== '/login') {
+                                window.history.replaceState(null, '', '/login');
+                            }
                         }}
                         className={`py-2.5 text-sm font-bold rounded-xl transition-all ${
                             mode === 'login'
@@ -180,6 +194,9 @@ export default function Login({
                             setMode('register');
                             setErrorMessage('');
                             setSuccessMessage('');
+                            if (typeof window !== 'undefined' && window.location.pathname !== '/register') {
+                                window.history.replaceState(null, '', '/register');
+                            }
                         }}
                         className={`py-2.5 text-sm font-bold rounded-xl transition-all ${
                             mode === 'register'
@@ -331,30 +348,38 @@ export default function Login({
                             {mode === 'login' ? (
                                 <p className="text-xs text-gray-600">
                                     Belum punya akun?{' '}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
+                                    <Link
+                                        href="/register"
+                                        onClick={(e) => {
+                                            e.preventDefault();
                                             setMode('register');
                                             setErrorMessage('');
+                                            if (typeof window !== 'undefined') {
+                                                window.history.pushState(null, '', '/register');
+                                            }
                                         }}
                                         className="font-bold text-violet-600 underline hover:text-violet-700 cursor-pointer"
                                     >
                                         Daftar gratis di sini
-                                    </button>
+                                    </Link>
                                 </p>
                             ) : (
                                 <p className="text-xs text-gray-600">
                                     Sudah punya akun?{' '}
-                                    <button
-                                        type="button"
-                                        onClick={() => {
+                                    <Link
+                                        href="/login"
+                                        onClick={(e) => {
+                                            e.preventDefault();
                                             setMode('login');
                                             setErrorMessage('');
+                                            if (typeof window !== 'undefined') {
+                                                window.history.pushState(null, '', '/login');
+                                            }
                                         }}
                                         className="font-bold text-violet-600 underline hover:text-violet-700 cursor-pointer"
                                     >
                                         Masuk di sini
-                                    </button>
+                                    </Link>
                                 </p>
                             )}
                         </div>

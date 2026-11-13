@@ -21,7 +21,10 @@ class RegisteredUserController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('Auth/Register');
+        return Inertia::render('Auth/Login', [
+            'initialMode' => 'register',
+            'status' => session('status'),
+        ]);
     }
 
     /**
