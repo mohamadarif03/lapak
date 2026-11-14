@@ -273,8 +273,9 @@ class AnalysisService
         $radiusKm = $radiusM / 1000.0;
         $areaKm2 = M_PI * ($radiusKm ** 2);
 
-        // Typical Indonesian urban density: ~ 5,500 - 8,500 people per km2
-        $densityPerKm2 = 7200;
+        // Estimasi demografi regional berbasis rata-rata densitas pemukiman BPS
+        // Densitas kawasan pemukiman & jangkauan efektif UMKM: ~ 1.500 - 2.500 jiwa per km2
+        $densityPerKm2 = 1800;
         $populationEstimate = (int) round($areaKm2 * $densityPerKm2);
 
         // Standardized age groups (BPS format)
