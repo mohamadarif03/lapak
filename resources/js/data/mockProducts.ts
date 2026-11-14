@@ -136,22 +136,6 @@ export const initialProducts: ProductItem[] = [
         soldCount: 41,
         createdAt: '2026-10-22',
     },
-    {
-        id: 7,
-        name: 'Teri Crispy Sambal Matah',
-        category: 'Sambal & Bumbu',
-        price: 22000,
-        unit: 'botol',
-        stock: 10,
-        lowStockThreshold: 5,
-        description: '', // Sengaja kosong agar berstatus "Belum Lengkap" untuk pengujian UI
-        images: [
-            'https://images.unsplash.com/photo-1505253758473-96b468138b18?w=600&auto=format&fit=crop&q=80',
-        ],
-        isActive: false, // Nonaktif
-        soldCount: 12,
-        createdAt: '2026-10-23',
-    },
 ];
 
 export const formatRupiah = (val: number): string => {
