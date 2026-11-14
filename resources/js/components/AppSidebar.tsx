@@ -990,6 +990,37 @@ export default function AppSidebar({
                     </div>
                 </div>
             )}
+
+            {/* Floating AI Voice Assistant Button (Melayang di pojok kanan bawah) */}
+            <div className="fixed bottom-6 right-6 z-40 flex items-center group">
+                {/* Tooltip on hover */}
+                <div className="absolute right-full mr-3 hidden sm:flex items-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                    <div className="bg-slate-900/90 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-lg whitespace-nowrap backdrop-blur-xs flex items-center gap-1.5 border border-slate-700">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                        <span>Bicara untuk Catat Transaksi (AI Voice)</span>
+                    </div>
+                </div>
+
+                <Link
+                    href="/catat"
+                    aria-label="Catat Transaksi Suara"
+                    className="relative flex items-center gap-2.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-3.5 py-3 md:px-4 md:py-3 text-white shadow-xl shadow-violet-500/35 ring-4 ring-white hover:scale-105 hover:shadow-2xl hover:shadow-violet-600/40 active:scale-95 transition-all duration-200 cursor-pointer"
+                >
+                    {/* Pulsing online/ready indicator */}
+                    <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-white"></span>
+                    </span>
+
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-xs">
+                        <Mic className="h-5 w-5 text-white animate-pulse" />
+                    </div>
+                    <div className="hidden sm:flex flex-col text-left pr-1">
+                        <span className="text-[10px] font-medium text-violet-200 leading-none">Asisten Suara</span>
+                        <span className="text-xs font-bold leading-tight">Bicara Kasir</span>
+                    </div>
+                </Link>
+            </div>
         </>
     );
 }
