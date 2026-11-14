@@ -1,0 +1,67 @@
+{
+  "name": "LAPAK - Asisten Digital UMKM",
+  "short_name": "LAPAK",
+  "description": "Asisten cerdas all-in-one untuk pencatatan keuangan, kasir suara AI, dan promosi UMKM Indonesia",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F8F9FB",
+  "theme_color": "#7C4DFF",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/logo-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Catat Suara Kasir",
+      "short_name": "Catat Suara",
+      "description": "Catat transaksi penjualan dengan perintah suara AI",
+      "url": "/catat",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Dashboard Bisnis",
+      "short_name": "Dashboard",
+      "description": "Lihat omset, laba rugi, dan performa tokomu",
+      "url": "/dashboard",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    },
+    {
+      "name": "Laporan Keuangan",
+      "short_name": "Keuangan",
+      "description": "Arus kas usaha dan pembukuan kasbon",
+      "url": "/keuangan",
+      "icons": [{ "src": "/icons/icon-192x192.png", "sizes": "192x192" }]
+    }
+  ],
+  "categories": ["business", "finance", "productivity"],
+  "lang": "id-ID"
+}

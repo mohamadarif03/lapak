@@ -28,6 +28,8 @@ import {
     AlertCircle,
     Volume2,
     ArrowRight,
+    Download,
+    Smartphone,
 } from 'lucide-react';
 
 export type ActivePage =
@@ -345,6 +347,10 @@ export default function AppSidebar({
     const [activeSampleText, setActiveSampleText] = useState<string | null>(null);
     const [voiceFeedback, setVoiceFeedback] = useState<string | null>(null);
 
+    // PWA Install Prompt State
+    const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+    const [isPwaInstalled, setIsPwaInstalled] = useState(false);
+
     const voiceGuide = getVoicePromptsForPage(current);
 
     const handleSimulatePrompt = (sample: { text: string; response: string }) => {
@@ -369,7 +375,37 @@ export default function AppSidebar({
         if (typeof window !== 'undefined' && window.innerWidth < 768 && setSidebarOpen) {
             setSidebarOpen(false);
         }
+
+        // Listener PWA Install
+        const handleBeforeInstallPrompt = (e: Event) => {
+            e.preventDefault();
+            setDeferredPrompt(e);
+        };
+
+        window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+
+        if (window.matchMedia('(display-mode: standalone)').matches) {
+            setIsPwaInstalled(true);
+        }
+
+        return () => {
+            window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+        };
     }, []);
+
+    const handleInstallPwa = async () => {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            if (outcome === 'accepted') {
+                showNotification('Aplikasi LAPAK berhasil dipasang!');
+                setDeferredPrompt(null);
+                setIsPwaInstalled(true);
+            }
+        } else {
+            showNotification('PWA siap: Pilih menu browser (titik 3 / Bagikan) lalu tekan "Tambahkan ke Layar Utama" / "Install Aplikasi".');
+        }
+    };
 
     const showNotification = (msg: string) => {
         if (onShowToast) {
@@ -1020,6 +1056,26 @@ export default function AppSidebar({
                                 <ExternalLink className="h-3 w-3 text-slate-400" />
                             </Link>
                         </li>
+
+                        {/* 13. Pasang Aplikasi PWA */}
+                        {!isPwaInstalled && (
+                            <li>
+                                <button
+                                    type="button"
+                                    onClick={handleInstallPwa}
+                                    className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-violet-700 bg-violet-50/80 hover:bg-violet-100 font-semibold transition cursor-pointer"
+                                    title="Pasang Aplikasi LAPAK di HP atau Laptop"
+                                >
+                                    <div className="flex items-center space-x-2.5">
+                                        <Smartphone className="h-4 w-4 text-violet-600" />
+                                        <span>Install Aplikasi (PWA)</span>
+                                    </div>
+                                    <span className="rounded bg-violet-200/90 px-1.5 py-0.5 text-[9px] font-extrabold text-violet-800">
+                                        PWA
+                                    </span>
+                                </button>
+                            </li>
+                        )}
                     </ul>
                 </div>
 
