@@ -26,6 +26,8 @@ import {
     Check,
     Clock,
     AlertCircle,
+    Volume2,
+    ArrowRight,
 } from 'lucide-react';
 
 export type ActivePage =
@@ -99,6 +101,223 @@ const initialOrders: OrderItem[] = [
     },
 ];
 
+interface VoicePromptGuide {
+    pageTitle: string;
+    pageBadge: string;
+    description: string;
+    examples: {
+        text: string;
+        response: string;
+    }[];
+}
+
+const getVoicePromptsForPage = (page: ActivePage): VoicePromptGuide => {
+    switch (page) {
+        case 'dashboard':
+            return {
+                pageTitle: 'Dashboard Utama',
+                pageBadge: 'Ringkasan & Aksi Kasir',
+                description: 'Kamu bisa menanyakan data performa tokomu atau merekam transaksi secara langsung:',
+                examples: [
+                    {
+                        text: 'Berapa laba bersih dan uang masuk minggu ini?',
+                        response: 'Laba bersih minggu ini tercatat Rp 5.650.000 dengan total uang masuk Rp 9.850.000.',
+                    },
+                    {
+                        text: 'Tampilkan pengeluaran paling boros hari ini',
+                        response: 'Pengeluaran terbesar hari ini adalah pos Bahan Baku sebesar 52%.',
+                    },
+                    {
+                        text: 'Catat pemasukan 150 ribu pesanan katering',
+                        response: 'Mengarahkan ke modul kasir: Pemasukan katering Rp 150.000 siap dicatat.',
+                    },
+                ],
+            };
+        case 'catat':
+            return {
+                pageTitle: 'Pencatatan Kasir (Catat)',
+                pageBadge: 'Voice to Transaction AI',
+                description: 'Ucapkan transaksi tokomu seperti berbicara ke asisten kasir nyata:',
+                examples: [
+                    {
+                        text: 'Catat nasi rawon tiga porsi tujuh puluh lima ribu tunai',
+                        response: 'Mengekstrak data: Pemasukan 3x Nasi Rawon nominal Rp 75.000 (Tunai) otomatis terisi.',
+                    },
+                    {
+                        text: 'Beli minyak goreng dua liter 34 ribu dari kas kecil',
+                        response: 'Mengekstrak data: Pengeluaran Bahan Baku Rp 34.000 berhasil dicatat.',
+                    },
+                    {
+                        text: 'Uang masuk 120 ribu dari Pak Joko via transfer QRIS',
+                        response: 'Mengekstrak data: Pemasukan Rp 120.000 metode pembayaran QRIS.',
+                    },
+                ],
+            };
+        case 'keuangan':
+        case 'laporan':
+            return {
+                pageTitle: page === 'laporan' ? 'Laporan Arus Kas' : 'Manajemen Keuangan',
+                pageBadge: 'Kas & Buku Utang',
+                description: 'Gunakan suara untuk memeriksa kas usaha dan mengelola kasbon pelanggan:',
+                examples: [
+                    {
+                        text: 'Berapa sisa saldo kas usaha yang tersisa saat ini?',
+                        response: 'Saldo kas usaha siap operasional tercatat Rp 8.750.000.',
+                    },
+                    {
+                        text: 'Siapa saja pelanggan yang masih ada kasbon belum lunas?',
+                        response: 'Ditemukan 2 transaksi piutang belum lunas: Bu Lina (Rp 45.000) dan Mas Eko (Rp 25.000).',
+                    },
+                    {
+                        text: 'Unduh laporan keuangan bulan ini ke format file',
+                        response: 'Menyiapkan file ekspor laporan kas format CSV/Excel untuk diunduh.',
+                    },
+                ],
+            };
+        case 'produk':
+        case 'etalase':
+            return {
+                pageTitle: 'Katalog & Produk Toko',
+                pageBadge: 'Manajemen Menu Jualan',
+                description: 'Kelola harga, stok, atau tambah menu dagangan baru tanpa repot mengetik:',
+                examples: [
+                    {
+                        text: 'Tambah produk baru Keripik Singkong Pedas harga 15 ribu',
+                        response: 'Membuka formulir: Produk baru Keripik Singkong Pedas (Rp 15.000) siap disimpan.',
+                    },
+                    {
+                        text: 'Berapa sisa stok es sinom hari ini?',
+                        response: 'Stok Es Sinom Segar terpantau tersisa 8 botol siap jual.',
+                    },
+                    {
+                        text: 'Ubah harga Nasi Rawon Daging jadi 28 ribu',
+                        response: 'Harga menu Nasi Rawon Daging diperbarui menjadi Rp 28.000.',
+                    },
+                ],
+            };
+        case 'promosi':
+            return {
+                pageTitle: 'Generator Konten Promosi',
+                pageBadge: 'Poster & Copywriting AI',
+                description: 'Instruksikan AI Gemini untuk membuat materi promosi tokomu:',
+                examples: [
+                    {
+                        text: 'Bikinkan poster promo diskon 20 persen untuk hari Jumat',
+                        response: 'Menyusun poster promo Canva-style dengan tema "Jumat Berkah Diskon 20%".',
+                    },
+                    {
+                        text: 'Buatkan pesan WhatsApp promo makan siang hemat',
+                        response: 'Copywriting siap: "Makan siang lezat & hemat di Dapur Bu Siti, pesan sekarang gratis ongkir!"',
+                    },
+                    {
+                        text: 'Tampilkan ide promosi kuliner untuk akhir pekan',
+                        response: 'Menampilkan 3 rekomendasi strategi promosi weekend khusus kuliner UMKM.',
+                    },
+                ],
+            };
+        case 'analisis':
+            return {
+                pageTitle: 'Analisis Bisnis & Pasar',
+                pageBadge: 'Rekomendasi AI Gemini',
+                description: 'Tanyakan insight penjualan dan tren pembeli di sekitarmu:',
+                examples: [
+                    {
+                        text: 'Hari apa warung saya paling ramai pembeli?',
+                        response: 'Berdasarkan data 28 hari, hari Sabtu adalah hari tersibuk dengan kontribusi omzet 28%.',
+                    },
+                    {
+                        text: 'Apa menu yang paling laris dalam 2 minggu terakhir?',
+                        response: 'Produk terlaris adalah Nasi Rawon Daging (total 84 porsi terjual).',
+                    },
+                    {
+                        text: 'Bagaimana saran AI untuk menaikkan omzet toko?',
+                        response: 'Saran Gemini: Buat paket bundling Rawon + Es Sinom di jam makan siang 11.30–13.30.',
+                    },
+                ],
+            };
+        case 'belajar':
+            return {
+                pageTitle: 'Belajar Mandiri UMKM',
+                pageBadge: 'Modul & Sertifikasi',
+                description: 'Navigasikan materi pelatihan dan cek kemampuan usahamu:',
+                examples: [
+                    {
+                        text: 'Buka modul cara jualan laris di WhatsApp Bisnis',
+                        response: 'Membuka Modul 2: Praktik Pemasaran Digital & Closing Pelanggan WhatsApp.',
+                    },
+                    {
+                        text: 'Berapa nilai tes dan progres belajar saya?',
+                        response: 'Progres belajarmu 75% (3 dari 4 modul selesai) dengan rata-rata post-test 88.',
+                    },
+                    {
+                        text: 'Rekomendasikan materi keuangan praktis untuk pemula',
+                        response: 'Mengarahkan ke materi: "Memisahkan Uang Usaha dan Uang Pribadi".',
+                    },
+                ],
+            };
+        case 'bantuan':
+            return {
+                pageTitle: 'Konsultasi & Mentor',
+                pageBadge: 'Tanya Ahli UMKM',
+                description: 'Hubungi mentor bisnis atau tanyakan solusi kendala tokomu:',
+                examples: [
+                    {
+                        text: 'Jadwalkan konsultasi dengan Kak Rendy besok jam 2 siang',
+                        response: 'Membuat draf jadwal temu daring dengan Kak Rendy (Pemasaran Digital).',
+                    },
+                    {
+                        text: 'Bagaimana syarat mengurus sertifikasi halal gratis?',
+                        response: 'Menampilkan panduan program SEHATI (Sertifikasi Halal Gratis) Kementerian Agama.',
+                    },
+                    {
+                        text: 'Tanyakan tips kemasan produk makanan tahan lama ke forum',
+                        response: 'Membuka formulir tanya jawab forum komunitas sesama pelaku UMKM.',
+                    },
+                ],
+            };
+        case 'pengaturan':
+            return {
+                pageTitle: 'Pengaturan & Preferensi',
+                pageBadge: 'Aksesibilitas Toko',
+                description: 'Sesuaikan kenyamanan aplikasi dan data usaha dengan suara:',
+                examples: [
+                    {
+                        text: 'Ubah ukuran tulisan ke mode besar',
+                        response: 'Mengaktifkan mode teks besar untuk keterbacaan yang lebih ramah mata.',
+                    },
+                    {
+                        text: 'Perbarui nomor telepon WhatsApp toko',
+                        response: 'Membuka bagian kontak profil usaha untuk diedit.',
+                    },
+                    {
+                        text: 'Hubungkan akun media sosial bisnis',
+                        response: 'Menampilkan integrasi tautan Instagram dan WhatsApp toko.',
+                    },
+                ],
+            };
+        default:
+            return {
+                pageTitle: 'Asisten Suara Pintar LAPAK',
+                pageBadge: 'Asisten Cerdas UMKM',
+                description: 'Cukup ucapkan instruksimu, sistem pintar LAPAK siap membantu:',
+                examples: [
+                    {
+                        text: 'Catat pemasukan lima puluh ribu rupiah',
+                        response: 'Transaksi pemasukan Rp 50.000 berhasil dicatat ke pembukuan kas.',
+                    },
+                    {
+                        text: 'Berapa total penjualan hari ini?',
+                        response: 'Total uang masuk hari ini tercatat Rp 1.450.000.',
+                    },
+                    {
+                        text: 'Buka menu catatan kas',
+                        response: 'Membuka modul pencatatan kas harian.',
+                    },
+                ],
+            };
+    }
+};
+
 export default function AppSidebar({
     current,
     sidebarOpen = true,
@@ -120,6 +339,24 @@ export default function AppSidebar({
     const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
     const [isLoggingOut, setIsLoggingOut] = useState(false);
     const [localToast, setLocalToast] = useState<string | null>(null);
+
+    const [isVoiceModalOpen, setIsVoiceModalOpen] = useState(false);
+    const [isSimulatingSpeech, setIsSimulatingSpeech] = useState(false);
+    const [activeSampleText, setActiveSampleText] = useState<string | null>(null);
+    const [voiceFeedback, setVoiceFeedback] = useState<string | null>(null);
+
+    const voiceGuide = getVoicePromptsForPage(current);
+
+    const handleSimulatePrompt = (sample: { text: string; response: string }) => {
+        setActiveSampleText(sample.text);
+        setIsSimulatingSpeech(true);
+        setVoiceFeedback(null);
+
+        setTimeout(() => {
+            setIsSimulatingSpeech(false);
+            setVoiceFeedback(sample.response);
+        }, 1100);
+    };
 
     useEffect(() => {
         const savedTheme = localStorage.getItem('lapak_theme');
@@ -997,13 +1234,18 @@ export default function AppSidebar({
                 <div className="absolute right-full mr-3 hidden sm:flex items-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <div className="bg-slate-900/90 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-lg whitespace-nowrap backdrop-blur-xs flex items-center gap-1.5 border border-slate-700">
                         <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                        <span>Bicara untuk Catat Transaksi (AI Voice)</span>
+                        <span>Panduan Bicara Perintah Suara (AI Voice)</span>
                     </div>
                 </div>
 
-                <Link
-                    href="/catat"
-                    aria-label="Catat Transaksi Suara"
+                <button
+                    type="button"
+                    onClick={() => {
+                        setIsVoiceModalOpen(true);
+                        setActiveSampleText(null);
+                        setVoiceFeedback(null);
+                    }}
+                    aria-label="Panduan Perintah Suara"
                     className="relative flex items-center gap-2.5 rounded-full bg-gradient-to-r from-violet-600 to-purple-600 px-3.5 py-3 md:px-4 md:py-3 text-white shadow-xl shadow-violet-500/35 ring-4 ring-white hover:scale-105 hover:shadow-2xl hover:shadow-violet-600/40 active:scale-95 transition-all duration-200 cursor-pointer"
                 >
                     {/* Pulsing online/ready indicator */}
@@ -1019,8 +1261,168 @@ export default function AppSidebar({
                         <span className="text-[10px] font-medium text-violet-200 leading-none">Asisten Suara</span>
                         <span className="text-xs font-bold leading-tight">Bicara Kasir</span>
                     </div>
-                </Link>
+                </button>
             </div>
+
+            {/* Modal Panduan & Simulasi Suara Interaktif (Pop-up Asisten Suara Kontekstual) */}
+            {isVoiceModalOpen && (
+                <div
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs animate-in fade-in duration-200"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="modal-voice-guide-title"
+                >
+                    <div className="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl border border-slate-100 overflow-hidden animate-in zoom-in-95 duration-200">
+                        {/* Header Gradient */}
+                        <div className="bg-gradient-to-r from-violet-600 via-purple-600 to-indigo-600 px-6 py-5 text-white relative">
+                            <button
+                                type="button"
+                                onClick={() => setIsVoiceModalOpen(false)}
+                                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer"
+                                aria-label="Tutup"
+                            >
+                                <X className="h-4 w-4" />
+                            </button>
+
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-white/20 backdrop-blur-md shadow-inner text-white ring-2 ring-white/30">
+                                    <Mic className="h-6 w-6 animate-pulse" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-400/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-200 uppercase tracking-wider border border-emerald-400/30">
+                                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+                                            AI Voice Ready
+                                        </span>
+                                        <span className="rounded-full bg-white/15 px-2.5 py-0.5 text-[10px] font-medium text-purple-100">
+                                            {voiceGuide.pageBadge}
+                                        </span>
+                                    </div>
+                                    <h3 id="modal-voice-guide-title" className="text-base sm:text-lg font-bold text-white mt-1">
+                                        Asisten Suara: {voiceGuide.pageTitle}
+                                    </h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Body Modal */}
+                        <div className="p-6 space-y-5 max-h-[75vh] overflow-y-auto">
+                            {/* Petunjuk Konteks Halaman */}
+                            <div className="rounded-2xl bg-violet-50/80 border border-violet-100 p-4">
+                                <div className="flex items-start gap-3">
+                                    <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-600 text-white shadow-xs">
+                                        <Sparkles className="h-4 w-4" />
+                                    </div>
+                                    <div className="text-xs text-slate-700 leading-relaxed">
+                                        <p className="font-semibold text-violet-950 mb-0.5">
+                                            Bicara Bebas dengan Bahasa Sehari-hari
+                                        </p>
+                                        <p className="text-slate-600">
+                                            {voiceGuide.description}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Daftar Contoh Perintah Suara yang Bisa Diklik */}
+                            <div>
+                                <label className="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">
+                                    Contoh Perintah Suara di Halaman Ini (Klik untuk Coba):
+                                </label>
+                                <div className="space-y-2">
+                                    {voiceGuide.examples.map((item, idx) => (
+                                        <button
+                                            key={idx}
+                                            type="button"
+                                            onClick={() => handleSimulatePrompt(item)}
+                                            className={`w-full text-left p-3.5 rounded-xl border text-xs transition-all flex items-start justify-between gap-3 group cursor-pointer ${
+                                                activeSampleText === item.text
+                                                    ? 'border-violet-600 bg-violet-50/70 shadow-xs ring-1 ring-violet-600/30'
+                                                    : 'border-slate-200 bg-white hover:border-violet-300 hover:bg-slate-50'
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-2.5">
+                                                <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-violet-100 text-violet-700 font-bold text-[10px]">
+                                                    {idx + 1}
+                                                </div>
+                                                <span className="font-medium text-slate-800 leading-snug">
+                                                    {item.text}
+                                                </span>
+                                            </div>
+                                            <div className="shrink-0 flex items-center gap-1 text-[11px] font-bold text-violet-600 opacity-80 group-hover:opacity-100">
+                                                <Volume2 className="h-3.5 w-3.5" />
+                                                <span>Uji</span>
+                                            </div>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Simulasi Suara & Balasan AI */}
+                            {(isSimulatingSpeech || voiceFeedback) && (
+                                <div className="rounded-2xl border border-violet-200 bg-gradient-to-b from-violet-50/50 to-white p-4 space-y-3 animate-in fade-in duration-200">
+                                    {/* Speech Bubble / Waveform */}
+                                    <div className="flex items-center gap-2.5">
+                                        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-violet-600 text-white">
+                                            <Mic className="h-3.5 w-3.5" />
+                                        </div>
+                                        <div className="flex-1">
+                                            <span className="text-[10px] font-bold uppercase tracking-wider text-violet-700 block">
+                                                Input Suara Terdeteksi
+                                            </span>
+                                            <p className="text-xs font-semibold text-slate-900 italic">
+                                                "{activeSampleText}"
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    {isSimulatingSpeech ? (
+                                        <div className="flex items-center justify-center gap-1.5 py-2">
+                                            <div className="h-2 w-2 rounded-full bg-violet-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                                            <div className="h-3 w-2 rounded-full bg-violet-600 animate-bounce" style={{ animationDelay: '150ms' }} />
+                                            <div className="h-4 w-2 rounded-full bg-purple-600 animate-bounce" style={{ animationDelay: '300ms' }} />
+                                            <div className="h-3 w-2 rounded-full bg-violet-600 animate-bounce" style={{ animationDelay: '450ms' }} />
+                                            <div className="h-2 w-2 rounded-full bg-violet-500 animate-bounce" style={{ animationDelay: '600ms' }} />
+                                            <span className="text-xs font-medium text-violet-700 ml-2">Menganalisis audio dengan Gemini AI...</span>
+                                        </div>
+                                    ) : voiceFeedback ? (
+                                        <div className="rounded-xl bg-emerald-50 border border-emerald-200 p-3 text-xs text-emerald-900 flex items-start gap-2.5 animate-in fade-in duration-150">
+                                            <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0 mt-0.5" />
+                                            <div className="space-y-0.5">
+                                                <span className="font-bold text-[11px] text-emerald-800">
+                                                    Respon AI Kasir:
+                                                </span>
+                                                <p className="leading-relaxed">
+                                                    {voiceFeedback}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    ) : null}
+                                </div>
+                            )}
+
+                            {/* Tombol aksi cepat */}
+                            <div className="pt-2 flex flex-col sm:flex-row items-center gap-2.5">
+                                <Link
+                                    href="/catat"
+                                    onClick={() => setIsVoiceModalOpen(false)}
+                                    className="w-full sm:flex-1 flex items-center justify-center gap-2 rounded-xl bg-violet-600 hover:bg-violet-700 text-white font-bold text-xs py-3 px-4 shadow-sm transition"
+                                >
+                                    <span>Buka Menu Rekam Suara Kasir</span>
+                                    <ArrowRight className="h-3.5 w-3.5" />
+                                </Link>
+                                <button
+                                    type="button"
+                                    onClick={() => setIsVoiceModalOpen(false)}
+                                    className="w-full sm:w-auto rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 font-bold text-xs py-3 px-5 transition cursor-pointer"
+                                >
+                                    Tutup
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
