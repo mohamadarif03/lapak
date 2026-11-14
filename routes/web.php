@@ -13,14 +13,24 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PromotionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SettingsController;
+use App\Models\Business;
+use App\Models\User;
 use App\Support\AuthHelper;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Landing Page & SEO
-Route::get('/', [LandingController::class, 'index'])->name('home');
+// Redirect root directly to login (or dashboard if already logged in)
+Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect()->route('dashboard');
+    }
+
+    return redirect()->route('login');
+})->name('home');
+
+Route::get('/lp', [LandingController::class, 'index'])->name('landing');
 Route::get('/robots.txt', [LandingController::class, 'robots']);
 Route::get('/sitemap.xml', [LandingController::class, 'sitemap']);
 
@@ -145,12 +155,12 @@ Route::delete('/api/pengaturan/account', [SettingsController::class, 'deleteAcco
 
 if (app()->environment('local', 'testing')) {
     Route::get('/demo-auth/{type}', function ($type) {
-        $user = \App\Models\User::first() ?? \App\Models\User::create([
+        $user = User::first() ?? User::create([
             'phone' => '081234567890',
             'name' => 'Bu Siti',
             'role' => 'user',
         ]);
-        $business = \App\Models\Business::first() ?? \App\Models\Business::create([
+        $business = Business::first() ?? Business::create([
             'user_id' => $user->id,
             'business_name' => 'Dapur Bu Siti',
             'owner_name' => 'Bu Siti',
