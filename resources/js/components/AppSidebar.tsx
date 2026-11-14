@@ -364,6 +364,11 @@ export default function AppSidebar({
             savedTheme === 'dark' ||
             document.documentElement.classList.contains('dark');
         setIsDarkMode(isDark);
+
+        // Tutup sidebar otomatis di mobile (< 768px) saat halaman dimuat
+        if (typeof window !== 'undefined' && window.innerWidth < 768 && setSidebarOpen) {
+            setSidebarOpen(false);
+        }
     }, []);
 
     const showNotification = (msg: string) => {
@@ -430,8 +435,8 @@ export default function AppSidebar({
                 </div>
             )}
 
-            {/* ================= FAR-LEFT ICON SIDEBAR ================= */}
-            <aside className="z-20 flex w-16 shrink-0 select-none flex-col items-center justify-between border-r border-slate-100 bg-white py-4 print:hidden">
+            {/* ================= FAR-LEFT ICON SIDEBAR (Desktop & Tablet >= 768px) ================= */}
+            <aside className="z-20 hidden md:flex w-16 shrink-0 select-none flex-col items-center justify-between border-r border-slate-100 bg-white py-4 print:hidden">
                 <div className="flex w-full flex-col items-center space-y-5">
                     {/* Brand Logo */}
                     <Link
@@ -658,12 +663,21 @@ export default function AppSidebar({
                 </div>
             </aside>
 
-            {/* ================= SECONDARY MENU SIDEBAR ================= */}
+            {/* Backdrop Mobile ketika drawer Menu Usaha terbuka */}
+            {sidebarOpen && (
+                <div
+                    onClick={() => setSidebarOpen && setSidebarOpen(false)}
+                    className="fixed inset-0 z-40 bg-slate-900/50 backdrop-blur-xs md:hidden"
+                    aria-hidden="true"
+                />
+            )}
+
+            {/* ================= SECONDARY MENU SIDEBAR (Static on Desktop/Tablet, Overlay Drawer on Mobile) ================= */}
             <aside
                 id="secondarySidebar"
-                className={`w-56 shrink-0 select-none flex-col justify-between overflow-y-auto border-r border-slate-100 bg-white px-3 py-4 print:hidden ${
-                    sidebarOpen ? 'flex' : 'hidden'
-                } lg:flex`}
+                className={`select-none flex-col justify-between overflow-y-auto border-r border-slate-100 bg-white px-3 py-4 print:hidden transition-all duration-200
+                    fixed inset-y-0 left-0 w-64 shadow-2xl z-50 md:static md:w-56 md:shadow-none md:z-20
+                    ${sidebarOpen ? 'flex' : 'hidden md:hidden'} md:flex`}
             >
                 <div>
                     {/* Header Sidebar */}
@@ -1228,8 +1242,80 @@ export default function AppSidebar({
                 </div>
             )}
 
-            {/* Floating AI Voice Assistant Button (Melayang di pojok kanan bawah) */}
-            <div className="fixed bottom-6 right-6 z-40 flex items-center group">
+            {/* Floating Mobile Bottom Navigation Bar (< 768px) - untuk navigasi praktis jempol di HP */}
+            {current !== 'catat' && (
+                <div className="fixed bottom-3 left-4 right-4 z-30 md:hidden print:hidden select-none">
+                    <nav className="bg-white/95 backdrop-blur-md rounded-2xl shadow-xl shadow-purple-950/10 border border-slate-200/80 px-2 py-1.5 flex items-center justify-around">
+                        {/* 1. Ringkasan Usaha (Home) */}
+                        <Link
+                            href="/dashboard"
+                            className={`flex flex-col items-center justify-center py-1 px-2.5 transition ${
+                                current === 'dashboard'
+                                    ? 'text-[#7C4DFF] font-bold'
+                                    : 'text-slate-500 hover:text-[#7C4DFF]'
+                            }`}
+                            title="Ringkasan Usaha"
+                        >
+                            <Home className={`w-5 h-5 ${current === 'dashboard' ? 'stroke-[2.5]' : ''}`} />
+                            <span className="text-[10px] tracking-tight mt-0.5">Beranda</span>
+                        </Link>
+
+                        {/* 2. Laporan / Keuangan */}
+                        <Link
+                            href="/keuangan"
+                            className={`flex flex-col items-center justify-center py-1 px-2.5 transition ${
+                                current === 'keuangan' || current === 'laporan'
+                                    ? 'text-[#7C4DFF] font-bold'
+                                    : 'text-slate-500 hover:text-[#7C4DFF]'
+                            }`}
+                            title="Laporan Kas"
+                        >
+                            <LineChart className={`w-5 h-5 ${current === 'keuangan' || current === 'laporan' ? 'stroke-[2.5]' : ''}`} />
+                            <span className="text-[10px] tracking-tight mt-0.5">Keuangan</span>
+                        </Link>
+
+                        {/* 3. Tombol Tengah Menonjol: Catat Suara */}
+                        <Link
+                            href="/catat"
+                            className="w-11 h-11 -mt-4 rounded-2xl bg-gradient-to-tr from-[#7C4DFF] to-[#9D4EDD] text-white flex items-center justify-center shadow-lg shadow-purple-500/40 ring-4 ring-white active:scale-95 transition"
+                            title="Catat Transaksi Suara"
+                        >
+                            <Mic className="w-5 h-5" />
+                        </Link>
+
+                        {/* 4. Konsultasi / Asisten AI */}
+                        <Link
+                            href="/bantuan"
+                            className={`flex flex-col items-center justify-center py-1 px-2.5 transition ${
+                                current === 'bantuan'
+                                    ? 'text-[#7C4DFF] font-bold'
+                                    : 'text-slate-500 hover:text-[#7C4DFF]'
+                            }`}
+                            title="Konsultasi & Mentor"
+                        >
+                            <MessageCircle className={`w-5 h-5 ${current === 'bantuan' ? 'stroke-[2.5]' : ''}`} />
+                            <span className="text-[10px] tracking-tight mt-0.5">Konsultasi</span>
+                        </Link>
+
+                        {/* 5. Toko / Pengaturan */}
+                        <Link
+                            href="/pengaturan"
+                            className={`flex flex-col items-center justify-center py-1 px-2.5 transition ${
+                                current === 'pengaturan'
+                                    ? 'text-[#7C4DFF] font-bold'
+                                    : 'text-slate-500 hover:text-[#7C4DFF]'
+                            }`}
+                            title="Pengaturan Usaha"
+                        >
+                            <Settings className={`w-5 h-5 ${current === 'pengaturan' ? 'stroke-[2.5]' : ''}`} />
+                            <span className="text-[10px] tracking-tight mt-0.5">Pengaturan</span>
+                        </Link>
+                    </nav>
+                </div>
+            )}
+
+            {/* Floating AI Voice Assistant Button (Melayang di pojok kanan bawah, naik di mobile agar tidak menimpa bottom bar) */}
+            <div className={`fixed ${current !== 'catat' ? 'bottom-20 right-4 md:bottom-6 md:right-6' : 'bottom-6 right-6'} z-40 flex items-center group`}>
                 {/* Tooltip on hover */}
                 <div className="absolute right-full mr-3 hidden sm:flex items-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                     <div className="bg-slate-900/90 text-white text-xs font-semibold px-3 py-1.5 rounded-xl shadow-lg whitespace-nowrap backdrop-blur-xs flex items-center gap-1.5 border border-slate-700">

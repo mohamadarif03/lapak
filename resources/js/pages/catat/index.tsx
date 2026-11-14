@@ -3,15 +3,20 @@ import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { Head, Link } from '@inertiajs/react';
 import {
   AlertCircle,
+  ArrowDownLeft,
   ArrowDownRight,
   ArrowRight,
   ArrowUpRight,
   BadgePercent,
+  Bell,
   BookOpen,
   Calendar,
   Check,
   CheckCircle2,
+  ChevronDown,
+  ChevronRight,
   Clock,
+  Coins,
   ExternalLink,
   Gift,
   HelpCircle,
@@ -20,18 +25,25 @@ import {
   LineChart,
   LogOut,
   Maximize,
+  MessageCircle,
   Mic,
   Moon,
   PenLine,
+  PieChart,
+  PiggyBank,
   Plus,
+  Receipt,
   RefreshCw,
   Search,
+  ShoppingBag,
   ShoppingCart,
   Sparkles,
   Store,
   Trash2,
   TrendingUp,
   TriangleAlert,
+  Trophy,
+  User,
   Users,
   Volume2,
   Wallet,
@@ -875,6 +887,32 @@ export default function CatatIndex({
     } catch {}
   };
 
+  const [mobileSearchQuery, setMobileSearchQuery] = useState('');
+  const filteredMobileTransactions = useMemo(() => {
+    if (!mobileSearchQuery.trim()) return transactions;
+    const q = mobileSearchQuery.toLowerCase();
+    return transactions.filter(
+      (t) =>
+        t.item.toLowerCase().includes(q) ||
+        (t.category && t.category.toLowerCase().includes(q)) ||
+        (t.note && t.note.toLowerCase().includes(q))
+    );
+  }, [transactions, mobileSearchQuery]);
+
+  const handleOpenManualEntryWith = (type: 'income' | 'expense') => {
+    setEditingTrxId(null);
+    setFormType(type);
+    setFormItem('');
+    setFormQuantity(1);
+    setFormAmountStr('');
+    setFormCategory(type === 'income' ? 'Penjualan' : 'Bahan Baku');
+    setFormNote('');
+    const nowLocal = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    setFormOccurredAt(nowLocal);
+    setFormErrors({});
+    setIsFormModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen overflow-x-hidden bg-[#f8f9fb] font-sans text-slate-700 antialiased print:bg-white print:text-black">
       <Head title="Catat Transaksi Suara & Kas - Lapak UMKM" />
@@ -931,8 +969,8 @@ export default function CatatIndex({
           }
         />
 
-        {/* ================= MAIN CONTENT AREA ================= */}
-        <div className="flex flex-1 flex-col overflow-y-auto">
+        {/* ================= DESKTOP MAIN CONTENT AREA (>= 768px) ================= */}
+        <div className="hidden md:flex flex-1 flex-col overflow-y-auto">
           {/* Header */}
           <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between border-b border-slate-100 bg-white/95 px-4 backdrop-blur sm:px-6">
             <div className="flex items-center space-x-3">
@@ -1325,6 +1363,351 @@ export default function CatatIndex({
               )}
             </div>
           </main>
+        </div>
+
+        {/* =========================================================================
+             2. TAMPILAN MOBILE (< 768px) - KONSEP PERSIS SESUAI index.html
+             ========================================================================= */}
+        <div className="md:hidden flex-1 overflow-y-auto bg-[#F5F5F9] pb-28">
+
+          {/* HERO PURPLE SECTION (Mengadaptasi gaya Hero Biru pada foto pertama dengan tema Ungu) */}
+          <div
+            className="text-white pt-6 pb-20 px-5 relative overflow-hidden"
+            style={{
+              background: 'linear-gradient(135deg, #7C4DFF 0%, #6534FF 100%)',
+              backgroundImage:
+                'radial-gradient(circle at 85% 50%, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.08) 28%, transparent 28%), radial-gradient(circle at 12% 75%, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.06) 22%, transparent 22%), linear-gradient(135deg, #7C4DFF 0%, #6534FF 100%)',
+            }}
+          >
+            {/* Ornamen Latar Belakang Samar */}
+            <Mic className="w-36 h-36 text-white/5 absolute -bottom-6 left-4 pointer-events-none" />
+            <Wallet className="w-40 h-40 text-white/5 absolute top-12 -right-8 pointer-events-none" />
+            <Sparkles className="w-16 h-16 text-white/5 absolute bottom-6 left-1/3 pointer-events-none" />
+
+            {/* Top Bar: Ikon Toko/Trophy, Search Bar Transparan, Ikon Notifikasi */}
+            <div className="flex items-center justify-between gap-3 mb-7 relative z-10">
+              <Link href="/dashboard" className="text-white hover:opacity-80 transition" title="Dashboard Usaha">
+                <Trophy className="w-6 h-6 fill-white/90" />
+              </Link>
+              <div className="flex-1 relative">
+                <Search className="w-4 h-4 text-white/80 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={mobileSearchQuery}
+                  onChange={(e) => setMobileSearchQuery(e.target.value)}
+                  placeholder='Cari "Transaksi Suara"'
+                  className="w-full bg-white/25 text-white placeholder-white/80 rounded-full py-2 pl-10 pr-4 text-xs focus:outline-none focus:bg-white/30 backdrop-blur-sm"
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => showToast('Tidak ada notifikasi baru')}
+                className="text-white hover:opacity-80 transition relative"
+                title="Notifikasi"
+              >
+                <Bell className="w-6 h-6 fill-white/90" />
+                <span className="w-2 h-2 bg-rose-400 rounded-full absolute top-0 right-0"></span>
+              </button>
+            </div>
+
+            {/* Info Saldo / Laba Bersih Tengah (Posisi Available Balance) */}
+            <div className="text-center relative z-10 my-1">
+              {/* Pill Kategori Suara Pintar */}
+              <div className="inline-flex items-center gap-1.5 text-xs text-white/95 font-medium mb-1.5 bg-white/15 px-3 py-1 rounded-full backdrop-blur-sm">
+                <span>🎙️</span>
+                <span>Catat Transaksi Suara</span>
+                <ChevronDown className="w-3.5 h-3.5" />
+              </div>
+
+              {/* Nominal Laba Bersih Hari Ini */}
+              <h1 className="text-4xl font-extrabold tracking-tight mb-1">
+                {dailySummary.formatted_profit || 'Rp 0'}
+              </h1>
+              <p className="text-xs text-white/80 font-normal mb-5">
+                Laba Bersih ({dailySummary.date_label || 'Hari Ini'}) • Selisih Kas
+              </p>
+
+              {/* Tombol Kapsul Utama Mulai Merekam */}
+              <button
+                type="button"
+                onClick={() => handleToggleRecording()}
+                disabled={recordingState === 'processing'}
+                className="inline-flex items-center gap-2 border border-white/85 hover:bg-white hover:text-[#7C4DFF] text-white text-xs font-semibold py-2.5 px-6 rounded-full transition duration-200 shadow-sm cursor-pointer"
+              >
+                <Mic className={`w-4 h-4 ${recordingState === 'recording' ? 'animate-ping text-rose-300' : ''}`} />
+                <span>
+                  {recordingState === 'recording'
+                    ? `Merekam (${recordingSeconds}s)... Ketuk Selesai`
+                    : recordingState === 'processing'
+                    ? 'Memproses Suara...'
+                    : 'Tekan Mulai Merekam'}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* OVERLAPPING CARD 3 KOLOM */}
+          <div className="px-5 -mt-12 relative z-20">
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 py-4 px-2 grid grid-cols-3 divide-x divide-slate-200/70">
+              {/* Kolom 1: Uang Masuk */}
+              <button
+                type="button"
+                onClick={() => handleOpenManualEntryWith('income')}
+                className="flex flex-col items-center justify-center gap-1.5 group py-1 cursor-pointer"
+              >
+                <div className="w-11 h-11 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition">
+                  <ArrowDownLeft className="w-5 h-5" />
+                </div>
+                <div className="text-center">
+                  <span className="text-[11px] text-slate-500 font-medium block">Uang Masuk</span>
+                  <span className="text-xs font-bold text-emerald-600">
+                    {dailySummary.formatted_income || 'Rp 0'}
+                  </span>
+                </div>
+              </button>
+
+              {/* Kolom 2: Uang Keluar */}
+              <button
+                type="button"
+                onClick={() => handleOpenManualEntryWith('expense')}
+                className="flex flex-col items-center justify-center gap-1.5 group py-1 cursor-pointer"
+              >
+                <div className="w-11 h-11 rounded-full bg-rose-500 text-white flex items-center justify-center shadow-sm group-hover:scale-105 transition">
+                  <ArrowUpRight className="w-5 h-5" />
+                </div>
+                <div className="text-center">
+                  <span className="text-[11px] text-slate-500 font-medium block">Uang Keluar</span>
+                  <span className="text-xs font-bold text-rose-600">
+                    {dailySummary.formatted_expense || 'Rp 0'}
+                  </span>
+                </div>
+              </button>
+
+              {/* Kolom 3: Ketik Manual */}
+              <button
+                type="button"
+                onClick={handleOpenManualEntry}
+                className="flex flex-col items-center justify-center gap-1.5 group py-1 cursor-pointer"
+              >
+                <div className="w-11 h-11 rounded-full bg-purple-50 text-[#7C4DFF] flex items-center justify-center group-hover:scale-105 transition">
+                  <PenLine className="w-5 h-5" />
+                </div>
+                <div className="text-center">
+                  <span className="text-[11px] text-slate-500 font-medium block">Input Manual</span>
+                  <span className="text-xs font-bold text-[#7C4DFF]">Ketik Saja</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* DAFTAR TRANSAKSI HARI INI ATAU CONTOH UCAPAN */}
+          <div className="px-5 mt-6">
+            <div className="flex items-center justify-between mb-3.5">
+              <div>
+                <h2 className="text-[16px] font-bold text-slate-800">
+                  {filteredMobileTransactions.length > 0 ? 'Daftar Transaksi Hari Ini' : 'Contoh Ucapan Suara'}
+                </h2>
+                <p className="text-[11px] text-slate-400">
+                  {filteredMobileTransactions.length > 0
+                    ? `Urut dari waktu transaksi paling baru (${filteredMobileTransactions.length} transaksi)`
+                    : 'Klik contoh di bawah untuk langsung mencatat otomatis'}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleOpenManualEntry()}
+                className="text-slate-600 hover:text-[#7C4DFF] transition p-1"
+                title="Tambah Transaksi"
+              >
+                <ArrowRight className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* List Card Putih (Persis gaya Spending, Income, Bills, Savings dari index.html) */}
+            <div className="bg-white rounded-2xl shadow-sm border border-slate-100 px-4 py-1.5 divide-y divide-slate-100">
+              {filteredMobileTransactions.length > 0 ? (
+                filteredMobileTransactions.map((t) => (
+                  <div key={t.id} className="flex items-center justify-between py-3.5">
+                    <div className="flex items-center gap-3.5 pr-2 min-w-0">
+                      <div
+                        className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${
+                          t.type === 'income'
+                            ? 'bg-emerald-50 text-emerald-600'
+                            : 'bg-rose-50 text-rose-600'
+                        }`}
+                      >
+                        {t.type === 'income' ? (
+                          <Coins className="w-5 h-5" />
+                        ) : (
+                          <ShoppingBag className="w-5 h-5" />
+                        )}
+                      </div>
+                      <div className="min-w-0">
+                        <span className="font-semibold text-slate-800 text-xs block truncate">
+                          {t.item}
+                        </span>
+                        <span className="text-[11px] text-slate-400 block mt-0.5 truncate">
+                          {t.type === 'income' ? 'Uang Masuk' : 'Uang Keluar'} • {t.category || 'Kas'}
+                          {t.formatted_time ? ` • ${t.formatted_time}` : ''}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span
+                        className={`font-bold text-xs ${
+                          t.type === 'income' ? 'text-emerald-600' : 'text-rose-600'
+                        }`}
+                      >
+                        {t.type === 'income' ? '+' : '-'}{t.formatted_amount}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleStartEdit(t)}
+                        className="text-slate-400 hover:text-[#7C4DFF] p-1 cursor-pointer"
+                        title="Edit Transaksi"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                /* 4 Contoh dari index.html jika transaksi kosong */
+                <>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleRecording('Jual dua nasi goreng tiga puluh ribu')}
+                    className="w-full flex items-center justify-between py-3.5 text-left cursor-pointer hover:bg-slate-50 transition"
+                  >
+                    <div className="flex items-center gap-3.5 pr-2">
+                      <div className="w-11 h-11 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <Coins className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-700 text-xs block">"Jual dua nasi goreng"</span>
+                        <span className="text-[11px] text-slate-400 block mt-0.5">Uang Masuk • Otomatis</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="font-bold text-emerald-600 text-xs">+Rp 30.000</span>
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleRecording('Beli gula dua puluh ribu')}
+                    className="w-full flex items-center justify-between py-3.5 text-left cursor-pointer hover:bg-slate-50 transition"
+                  >
+                    <div className="flex items-center gap-3.5 pr-2">
+                      <div className="w-11 h-11 rounded-full bg-indigo-50 text-[#3A57E8] flex items-center justify-center shrink-0">
+                        <ShoppingBag className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-700 text-xs block">"Beli gula dua puluh ribu"</span>
+                        <span className="text-[11px] text-slate-400 block mt-0.5">Uang Keluar • Bahan Baku</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="font-bold text-rose-600 text-xs">-Rp 20.000</span>
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleRecording('Bayar listrik limabelas rebu')}
+                    className="w-full flex items-center justify-between py-3.5 text-left cursor-pointer hover:bg-slate-50 transition"
+                  >
+                    <div className="flex items-center gap-3.5 pr-2">
+                      <div className="w-11 h-11 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+                        <Receipt className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-700 text-xs block">"Bayar listrik limabelas rebu"</span>
+                        <span className="text-[11px] text-slate-400 block mt-0.5">Uang Keluar • Operasional</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="font-bold text-rose-600 text-xs">-Rp 15.000</span>
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleToggleRecording('Terjual es kopi goceng')}
+                    className="w-full flex items-center justify-between py-3.5 text-left cursor-pointer hover:bg-slate-50 transition"
+                  >
+                    <div className="flex items-center gap-3.5 pr-2">
+                      <div className="w-11 h-11 rounded-full bg-orange-50 text-orange-500 flex items-center justify-center shrink-0">
+                        <PiggyBank className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <span className="font-semibold text-slate-700 text-xs block">"Terjual es kopi goceng"</span>
+                        <span className="text-[11px] text-slate-400 block mt-0.5">Uang Masuk • Penjualan</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="font-bold text-amber-500 text-xs">+Rp 5.000</span>
+                      <ChevronRight className="w-4 h-4 text-slate-400" />
+                    </div>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+
+          {/* FLOATING BOTTOM NAVIGATION BAR (Persis konsep foto pertama) */}
+          <div className="fixed bottom-4 left-5 right-5 z-30">
+            <nav className="bg-white rounded-2xl shadow-lg shadow-slate-300/50 border border-slate-100 px-3 py-2 flex items-center justify-around">
+              {/* Ringkasan Usaha (Home) */}
+              <Link
+                href="/dashboard"
+                className="flex flex-col items-center justify-center py-1 px-3 text-slate-700 hover:text-[#7C4DFF] transition"
+                title="Ringkasan Usaha"
+              >
+                <Home className="w-6 h-6" />
+              </Link>
+
+              {/* Laporan Laba Rugi */}
+              <Link
+                href="/catat/laporan"
+                className="flex flex-col items-center justify-center py-1 px-3 text-slate-700 hover:text-[#7C4DFF] transition"
+                title="Laporan Kas"
+              >
+                <PieChart className="w-6 h-6" />
+              </Link>
+
+              {/* Tombol Tengah Menonjol: Rekam Suara */}
+              <button
+                type="button"
+                onClick={() => handleToggleRecording()}
+                className="w-12 h-12 rounded-xl bg-[#7C4DFF] text-white flex items-center justify-center shadow-md shadow-[#7C4DFF]/35 hover:bg-[#6839ed] transition cursor-pointer"
+                title="Rekam Suara"
+              >
+                <Mic className="w-6 h-6" />
+              </button>
+
+              {/* Tanya Mentor / Asisten AI */}
+              <Link
+                href="/konsultasi"
+                className="flex flex-col items-center justify-center py-1 px-3 text-slate-700 hover:text-[#7C4DFF] transition"
+                title="Tanya Mentor"
+              >
+                <MessageCircle className="w-6 h-6" />
+              </Link>
+
+              {/* Akun / Pengaturan Usaha */}
+              <Link
+                href="/pengaturan"
+                className="flex flex-col items-center justify-center py-1 px-3 text-slate-700 hover:text-[#7C4DFF] transition"
+                title="Pengaturan Akun"
+              >
+                <User className="w-6 h-6" />
+              </Link>
+            </nav>
+          </div>
         </div>
       </div>
 

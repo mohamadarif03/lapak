@@ -794,7 +794,7 @@ export default function Dashboard() {
                     </header>
 
                     {/* ================= SCROLLABLE DASHBOARD BODY ================= */}
-                    <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6">
+                    <main className="flex-1 overflow-y-auto px-4 py-5 sm:px-6 pb-28 md:pb-6">
                         {/* -------------------------------------------------------------
                             BAGIAN 1: HEADER HALAMAN
                             - Sapaan nama pengguna & nama usaha
